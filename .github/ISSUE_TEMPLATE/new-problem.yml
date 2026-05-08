@@ -1,0 +1,43 @@
+name: 亀尾くん問題案
+about: 新しい亀尾くん問題のアイデアを登録する
+labels: [problem, idea]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 問題のねらい
+      description: この問題で考えてほしいこと、面白さ、狙いを書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: statement
+    attributes:
+      label: 問題文案
+      description: まだ下書きで構いません。
+    validations:
+      required: true
+  - type: input
+    id: answer
+    attributes:
+      label: 想定する答え
+      description: 現時点の答えを書いてください。
+    validations:
+      required: false
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: 難易度
+      options:
+        - 未設定
+        - やさしい
+        - ふつう
+        - むずかしい
+    validations:
+      required: true
+  - type: textarea
+    id: concerns
+    attributes:
+      label: 不安な点・レビューしてほしい点
+      description: 曖昧さ、別解、表現など、気になっていることを書いてください。
+    validations:
+      required: false
