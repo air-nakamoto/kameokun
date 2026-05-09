@@ -1,0 +1,198 @@
+{
+  "id": "problem_demoreport01",
+  "schema_version": "1.0.0",
+  "public": {
+    "title": "伝わらない報告",
+    "intro": "こんにちは...実は今、すごく困っていることがあって...。私、健太と申します。最近会社でのコミュニケーションはチャットやメールがほとんどなんですが、先輩社員とのやり取りがうまくいっていません。特に、チャットでの業務報告が「要点がわからない」「結局どうしてほしいの？」と何度も指摘されてしまい、すっかり自信をなくしてしまいました。どうすれば、先輩に分かりやすく、的確な報告ができるようになるのでしょうか...。",
+    "rules": "登場人物に自由に質問しながら、真相と相談者が取るべき次の一手を考えてください。解けたと思ったら「解答する」欄に、分かったことと解決策を書いてください。",
+    "player_visible_tags": {
+      "estimated_minutes": 30,
+      "difficulty": "standard"
+    }
+  },
+  "internal": {
+    "situation_type": "workplace",
+    "tone": "light",
+    "charm_pattern": "一見きちんと報告しているのに、なぜか伝わらない",
+    "misdirection": "相談者は情報量が足りないことが問題だと思い込んでいる",
+    "truth_reveal": "相手が知りたいのは経緯ではなく、先に取るべき行動と依頼内容だった",
+    "solution_shape": "相手の行動を先に考え、報告順を変える",
+    "resolution_pattern": "perspective_shift"
+  },
+  "characters": [
+    {
+      "id": "kenta",
+      "name": "健太",
+      "role": "相談者。IT企業2年目の社員",
+      "personality": "真面目で向上心があり、少し自信をなくしている",
+      "speech_style": "丁寧で少し不安そう",
+      "known_facts": [
+        "業務報告を時系列で詳しく書いている",
+        "先輩から「要点がわからない」「結局どうしてほしいの？」と言われている",
+        "先輩を尊敬しているが、そっけなくて少し怖いと感じている",
+        "机の見つけにくい場所に、先輩らしき付箋が貼られている"
+      ],
+      "unknown_facts": [
+        "先輩が後輩への接し方で悩んでいること",
+        "付箋が先輩なりの不器用なコミュニケーションであること"
+      ],
+      "must_not_reveal_directly": [
+        "報告は結論と依頼を先に書くべきである",
+        "付箋は先輩の不器用な優しさである"
+      ],
+      "is_client": true
+    },
+    {
+      "id": "tanaka",
+      "name": "田中さん",
+      "role": "健太の隣席の同僚",
+      "personality": "穏やかで社内の人間関係に詳しい",
+      "speech_style": "気さく",
+      "known_facts": [
+        "付箋の字は先輩の字に見える",
+        "先輩は真面目だが不器用で、後輩思いな人である"
+      ],
+      "unknown_facts": [
+        "先輩が上司に具体的に何を相談していたか"
+      ],
+      "must_not_reveal_directly": []
+    },
+    {
+      "id": "yamada",
+      "name": "山田課長",
+      "role": "先輩の上司",
+      "personality": "面倒見がよく、部下の様子をよく見ている",
+      "speech_style": "落ち着いた口調",
+      "known_facts": [
+        "先輩は後輩への接し方を気にして相談に来ていた",
+        "先輩はチャット以外のコミュニケーションを取ろうとしていた",
+        "付箋は先輩が考えた不器用な歩み寄りである"
+      ],
+      "unknown_facts": [],
+      "must_not_reveal_directly": [
+        "付箋が最終解決の鍵である"
+      ]
+    }
+  ],
+  "truth": {
+    "hidden_truth": "健太の報告は時系列で丁寧だが、先輩が最初に知りたい「結論」と「依頼内容」が後回しになっているため伝わっていない。さらに、そっけなく見える先輩自身も後輩との接し方に悩み、付箋という不器用な方法で歩み寄ろうとしている。",
+    "objective_facts": [
+      {
+        "id": "fact_report_timeseries",
+        "fact": "健太は調査した順番に沿って、経緯を詳しく報告している",
+        "verifiable_by": ["kenta"]
+      },
+      {
+        "id": "fact_senpai_request",
+        "fact": "先輩は「結局どうしてほしいの？」と返している",
+        "verifiable_by": ["kenta"]
+      },
+      {
+        "id": "fact_report_need_action",
+        "fact": "健太が本当に欲しかったのは、アカウント確認と顧客対応方針への指示だった",
+        "verifiable_by": ["kenta"]
+      },
+      {
+        "id": "fact_sticky_notes",
+        "fact": "健太の机の見つけにくい場所に、「了解」などの一言と下手なイラストが描かれた付箋が貼られている",
+        "verifiable_by": ["kenta", "tanaka"]
+      },
+      {
+        "id": "fact_tanaka_knows_senpai",
+        "fact": "田中さんは、先輩が真面目で不器用だが後輩思いだと知っている",
+        "verifiable_by": ["tanaka"]
+      },
+      {
+        "id": "fact_senpai_consulted",
+        "fact": "山田課長は、先輩が後輩への接し方を気にして相談していたことを知っている",
+        "verifiable_by": ["yamada"]
+      }
+    ],
+    "subjective_beliefs": [
+      {
+        "character_id": "kenta",
+        "belief": "詳しく時系列で書けば分かりやすい報告になると思っている",
+        "is_misperception": true
+      },
+      {
+        "character_id": "kenta",
+        "belief": "先輩はそっけなく、自分を怖がらせる人かもしれないと感じている",
+        "is_misperception": true
+      }
+    ],
+    "misunderstandings": [
+      "情報量が足りないから報告が伝わらない",
+      "先輩はただそっけなくて怖い人である"
+    ],
+    "two_stage_structure": {
+      "stage_1_truth": "報告は時系列ではなく、結論と依頼内容を先に出す必要がある",
+      "stage_2_solution": "報告順を変えたうえで、先輩の不器用な歩み寄りにも気づき、感謝をきっかけに健太から歩み寄る"
+    }
+  },
+  "answer_policy": {
+    "default_style": "character_roleplay",
+    "allowed_answer_types": ["yes", "no", "unknown", "partial", "freeform"],
+    "reveal_rules": [
+      {
+        "trigger": "普段の報告やメールについて聞かれた場合",
+        "content": "健太は起きたことを順番に詳しく書いていることを話してよい",
+        "stage_required": "any"
+      },
+      {
+        "trigger": "先輩や付箋について聞かれた場合",
+        "content": "机の見つけにくい場所に一言と下手な絵の付箋があることを話してよい",
+        "stage_required": "stage_1"
+      }
+    ],
+    "refusal_rules": [],
+    "consistency_rules": [
+      "健太は自分から最終解決策を提案しない",
+      "田中さんは先輩の内心までは断定しない",
+      "山田課長は先輩の相談内容を穏やかに説明する"
+    ]
+  },
+  "solution_criteria": {
+    "truth_requirements": [
+      {
+        "id": "truth_report_order",
+        "description": "健太の報告は時系列中心で、先輩が知りたい結論と依頼が後回しになっていると理解する",
+        "anchored_facts": ["fact_report_timeseries", "fact_senpai_request", "fact_report_need_action"]
+      },
+      {
+        "id": "truth_senpai_kindness",
+        "description": "付箋は先輩の不器用な歩み寄りであり、先輩も後輩との接し方に悩んでいたと理解する",
+        "anchored_facts": ["fact_sticky_notes", "fact_tanaka_knows_senpai", "fact_senpai_consulted"]
+      }
+    ],
+    "solution_requirements": [
+      {
+        "id": "solution_report_structure",
+        "description": "報告は結論、依頼、経緯の順に変える"
+      },
+      {
+        "id": "solution_walk_toward_senpai",
+        "description": "先輩の付箋をきっかけに、健太から感謝や歩み寄りを伝える"
+      }
+    ],
+    "minimum_to_clear": [
+      "truth_report_order",
+      "truth_senpai_kindness",
+      "solution_report_structure",
+      "solution_walk_toward_senpai"
+    ]
+  },
+  "quality_gate": {
+    "passed": true,
+    "fail_conditions": [
+      { "code": "solvable_without_truth", "triggered": false },
+      { "code": "solution_not_unique", "triggered": false },
+      { "code": "unnatural_concealment", "triggered": false },
+      { "code": "unreachable_truth", "triggered": false },
+      { "code": "charm_relies_on_oddity_only", "triggered": false },
+      { "code": "stage1_stage2_too_close", "triggered": false },
+      { "code": "truth_lacks_objective_anchor", "triggered": false },
+      { "code": "solution_too_abstract", "triggered": false },
+      { "code": "pattern_collision_with_samples", "triggered": false }
+    ]
+  }
+}

@@ -28,6 +28,7 @@
 ## 再開時にまず読むもの
 
 - [プロジェクト現状メモ](docs/project-state.md) — 現在の構成、起動方法、残課題
+- [実装計画と課題一覧](docs/implementation-plan.md) — 今後の優先順位と確認項目
 - [問題スキーマ](schemas/problem.schema.json) — AI生成問題JSONの契約
 - [生成プロンプト](prompts/generate-problem.md) — 問題生成の指示
 - [統合ガイドライン](docs/guidelines/bot-guideline.md) — 亀夫君問題の作問・進行ルール
@@ -43,6 +44,8 @@ npm install
 ```bash
 KAMEO_USE_STUBS=true npm run dev
 ```
+
+スタブモードでは、デモ問題「伝わらない報告」が出題されます。LLM接続なしでも、問題開始・対話・中本ヒント・解答判定の流れを確認できます。
 
 実LLMを使う場合:
 
@@ -73,7 +76,7 @@ npm test
 
 ```bash
 npm run validate        # valid fixture に対する schema + cross-ref 検証
-npm run test:fixtures   # valid は通り、broken は落ちることを確認
+npm run test:fixtures   # valid/demo は通り、broken は落ちることを確認
 npm run test:session-ttl
 ```
 
@@ -166,6 +169,7 @@ npm run test:session-ttl
 ## ドキュメント
 
 - [プロジェクト現状メモ](docs/project-state.md) — MVP構成・起動方法・残課題
+- [実装計画と課題一覧](docs/implementation-plan.md) — 次にやること、既知課題、検証項目
 - [統合ガイドライン](docs/guidelines/bot-guideline.md) — ボットの動作ルール・品質基準
 - [出題テンプレート集](docs/guidelines/presentation-templates.md) — 出題〜感想戦のセリフテンプレート
 - [中本アイアール口調ガイド](docs/guidelines/nakamoto-voice-guide.md) — キャラクター設定・口調ルール

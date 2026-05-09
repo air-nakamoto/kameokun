@@ -20,7 +20,7 @@ import {
   validateProblem,
   type ValidationError,
 } from '@/lib/validate-problem';
-import validProblem from '@/scripts/fixtures/valid-problem.json' with { type: 'json' };
+import demoProblem from '@/scripts/fixtures/demo-problem.json' with { type: 'json' };
 
 const MAX_GENERATION_ATTEMPTS = 3;
 
@@ -201,7 +201,7 @@ async function attemptGeneration(
 
 async function generateProblem(input: InputParams): Promise<KameokunProblem> {
   if (!isLLMEnabled()) {
-    return validProblem as unknown as KameokunProblem;
+    return demoProblem as unknown as KameokunProblem;
   }
 
   const systemPrompt = await loadPrompt('generate-problem');

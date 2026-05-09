@@ -3,6 +3,7 @@
 //
 // 確認内容:
 //   - valid-problem.json   → ajv: pass / cross-ref: pass
+//   - demo-problem.json    → ajv: pass / cross-ref: pass
 //   - broken-problem.json  → ajv: fail / cross-ref: fail
 //
 // 「壊れたものが落ちる」ことまで確認するのが目的。
@@ -19,6 +20,7 @@ import { spawn } from 'node:child_process';
 import { argv, exit } from 'node:process';
 
 const VALID = 'scripts/fixtures/valid-problem.json';
+const DEMO = 'scripts/fixtures/demo-problem.json';
 const BROKEN = 'scripts/fixtures/broken-problem.json';
 
 function run(cmd, args) {
@@ -53,6 +55,8 @@ async function crossCheck(file) {
 const cases = [
   { name: 'valid + ajv',           file: VALID,  fn: ajvCheck,   expectExit: 0 },
   { name: 'valid + cross-ref',     file: VALID,  fn: crossCheck, expectExit: 0 },
+  { name: 'demo + ajv',            file: DEMO,   fn: ajvCheck,   expectExit: 0 },
+  { name: 'demo + cross-ref',      file: DEMO,   fn: crossCheck, expectExit: 0 },
   { name: 'broken + ajv',          file: BROKEN, fn: ajvCheck,   expectExit: 1 },
   { name: 'broken + cross-ref',    file: BROKEN, fn: crossCheck, expectExit: 1 },
 ];

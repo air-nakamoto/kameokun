@@ -14,6 +14,7 @@ import {
   SolveCheckOutputSchema,
   type SolveCheckOutput,
 } from '@/lib/llm-schemas';
+import { buildDemoSolveCheck } from '@/lib/demo-stub';
 
 type SolveStatus = SolveCheckOutput['status'];
 
@@ -40,16 +41,7 @@ async function runSolveCheck(
   playerAnswer: string,
 ): Promise<SolveCheckOutput> {
   if (!isLLMEnabled()) {
-    return {
-      status: 'unsolved',
-      minimum_to_clear_satisfied: false,
-      met_requirement_ids: [],
-      missing_requirement_ids: [],
-      per_requirement: [],
-      confidence: 'low',
-      can_reveal_explanation: false,
-      player_message: 'もう少し会話を続けると、見えてくるものがあるかもしれません。',
-    };
+    return buildDemoSolveCheck(playerAnswer);
   }
   return callLLMJson(
     {

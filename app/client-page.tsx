@@ -206,6 +206,7 @@ export default function ClientPage() {
   const [answer, setAnswer] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [solveResult, setSolveResult] = useState<SolveResult | null>(null);
   const [hint, setHint] = useState<NakamotoHint | null>(null);
 
@@ -229,6 +230,7 @@ export default function ClientPage() {
 
   async function startNewProblem() {
     clearError();
+    setStatusMessage('問題を準備しています...');
     setBusy(true);
     try {
       const res = await fetch('/api/generate-problem', {
@@ -238,10 +240,16 @@ export default function ClientPage() {
       });
       if (!res.ok) {
         setError(friendlyError(res.status));
+        setStatusMessage(null);
         return;
       }
       const data = await res.json();
       const chars: CharacterOverview[] = data.characters_overview ?? [];
+      if (!data.session_id || !data.public || chars.length === 0) {
+        setError('問題データの受け取りに失敗しました。');
+        setStatusMessage(null);
+        return;
+      }
       const defaultSpeaker =
         chars.find(c => c.is_client)?.id ?? chars[0]?.id ?? '';
       setSession({ id: data.session_id, public: data.public, characters: chars });
@@ -251,8 +259,10 @@ export default function ClientPage() {
       setHint(null);
       setInput('');
       setAnswer('');
+      setStatusMessage('問題を開始しました。');
     } catch {
       setError('通信エラーが発生しました。');
+      setStatusMessage(null);
     } finally {
       setBusy(false);
     }
@@ -381,6 +391,20 @@ export default function ClientPage() {
       </p>
 
       {error && <div style={styles.errorBox}>{error}</div>}
+      {statusMessage && !error && (
+        <div
+          style={{
+            background: '#eef6ff',
+            border: '1px solid #9fc4ee',
+            color: '#24517a',
+            padding: '0.6rem 0.8rem',
+            borderRadius: 6,
+            marginBottom: '0.75rem',
+          }}
+        >
+          {statusMessage}
+        </div>
+      )}
 
       {!session ? (
         <section style={styles.card}>

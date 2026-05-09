@@ -2,6 +2,8 @@
 
 このファイルは、一旦作業を中断しても再開しやすいように、Kameokun MVPの現状・構成・次タスクをまとめたものです。
 
+具体的な優先順位と実装候補は [実装計画と課題一覧](implementation-plan.md) を参照してください。
+
 ## 現在の状態
 
 - Next.js App Router のMVPが実装済み
@@ -10,7 +12,7 @@
   - 登場人物との対話
   - 解答判定
   - 中本さんヒント
-- `KAMEO_USE_STUBS=true` では固定fixture/固定応答で動作
+- `KAMEO_USE_STUBS=true` ではデモ問題「伝わらない報告」と簡易スタブ応答で動作
 - `ANTHROPIC_API_KEY` を入れると実LLM経路に切り替わる
 - 問題JSON、真相、解決条件はサーバ側セッションに保持し、クライアントには返さない
 
@@ -118,7 +120,7 @@ npm test
 - `scripts/validate-problem.mjs`
   - CLI用クロス参照検証
 - `scripts/test-fixtures.mjs`
-  - valid/broken fixtureの正負テスト
+  - valid/demo/broken fixtureの正負テスト
 - `scripts/test-session-ttl.mjs`
   - セッションTTLテスト
 

@@ -7,12 +7,14 @@ import {
   parseJsonBody,
   validate,
 } from '@/lib/api-utils';
-import { getSession, updateSession } from '@/lib/session-store';
+import { getSession, updateSession, type Session } from '@/lib/session-store';
 import { buildDialogueInput } from '@/lib/restricted-views';
 import { safetyCheck } from '@/lib/safety-check';
 import { callLLMJson, isLLMEnabled, LLMError, redactLLMErrorDetails } from '@/lib/llm';
 import { DialogueOutputSchema, type DialogueOutput } from '@/lib/llm-schemas';
 import { validateDialogueCandidate } from '@/lib/dialogue-validation';
+import { buildDemoDialogueCandidate } from '@/lib/demo-stub';
+import type { Stage } from '@/lib/types';
 
 const InputSchema = z.object({
   session_id: z.string().min(1),
@@ -22,24 +24,17 @@ const InputSchema = z.object({
 
 interface DialoguePipelineResult {
   candidate: DialogueOutput;
+  nextStage?: Stage;
 }
 
 async function runDialogueModel(
   systemPrompt: string,
   dialogueInput: ReturnType<typeof buildDialogueInput>,
   fallbackSpeakerId: string,
+  session: Session,
 ): Promise<DialoguePipelineResult> {
   if (!isLLMEnabled()) {
-    return {
-      candidate: {
-        speaker_id: fallbackSpeakerId,
-        response: '（スタブ応答）えーっと、それはちょっと分からないですね…。',
-        answer_type: 'unknown',
-        disclosed_fact_ids: [],
-        referenced_fact_ids: [],
-        applied_rules: { reveal_rule_indices: [], refusal_rule_indices: [] },
-      },
-    };
+    return buildDemoDialogueCandidate(session, dialogueInput);
   }
   const candidate = await callLLMJson(
     {
@@ -77,7 +72,7 @@ export async function POST(req: Request) {
 
     let pipeline: DialoguePipelineResult;
     try {
-      pipeline = await runDialogueModel(systemPrompt, dialogueInput, targetId);
+      pipeline = await runDialogueModel(systemPrompt, dialogueInput, targetId, session);
     } catch (e) {
       if (e instanceof LLMError) {
         console.error('[dialogue] LLMError', {
@@ -141,6 +136,7 @@ export async function POST(req: Request) {
     const newDisclosed = candidate.disclosed_fact_ids;
 
     updateSession(session_id, {
+      stage: pipeline.nextStage ?? session.stage,
       history: [
         ...session.history,
         { role: 'player', content: player_message },

@@ -5,16 +5,19 @@
 ## ファイル
 
 - `valid-problem.json` — 9検査項目すべてpassする最小整合JSON。`PASS` 期待
+- `demo-problem.json` — スタブモードで実際に出題するデモ問題。`PASS` 期待
 - `broken-problem.json` — 9検査項目すべてに違反する壊れたJSON。`FAIL` 期待
 
 ## 確認コマンド
 
-最も簡単なのは `npm run test:fixtures`。これで以下4ケースを一括検査します。
+最も簡単なのは `npm run test:fixtures`。これで以下6ケースを一括検査します。
 
 | ケース | 期待 |
 |---|---|
 | `valid + ajv` | exit 0 |
 | `valid + cross-ref` | exit 0 |
+| `demo + ajv` | exit 0 |
+| `demo + cross-ref` | exit 0 |
 | `broken + ajv` | exit 1 |
 | `broken + cross-ref` | exit 1 |
 
@@ -23,6 +26,7 @@
 ```sh
 # クロス参照のみ
 node scripts/validate-problem.mjs scripts/fixtures/valid-problem.json
+node scripts/validate-problem.mjs scripts/fixtures/demo-problem.json
 node scripts/validate-problem.mjs scripts/fixtures/broken-problem.json
 
 # JSON Schema のみ
