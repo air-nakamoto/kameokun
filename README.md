@@ -16,6 +16,7 @@
 ├── .github/
 │   ├── ISSUE_TEMPLATE/      # 問題案登録用の Issue テンプレート
 │   └── pull_request_template.md
+├── bot/                     # ボット向けガイドライン・会話テンプレート・口調ガイド
 ├── docs/                    # 運用手順や移行メモ
 ├── problems/                # 問題本文・解説・メタ情報
 └── README.md
@@ -56,6 +57,10 @@ problems/2026-05-08-sample-kameokun.md
 
 Claude Project に入れていたドキュメントを貼り付けて移行する手順は [`docs/claude-project-import.md`](docs/claude-project-import.md) を参照してください。
 
-取り込んだボット向けガイドラインは [`bot/kameo-guidelines.md`](bot/kameo-guidelines.md) に保存しています。
-出題時に使う会話テンプレートは [`bot/kameo-templates.md`](bot/kameo-templates.md) に保存しています。
-中本アイアールの口調ガイドは [`bot/nakamoto-style-guide.md`](bot/nakamoto-style-guide.md) に保存しています。
+## 取り込み済みのボット資料
+
+Claude Project から取り込んだボット向け資料は `bot/` ディレクトリで管理します。
+
+- 統合ガイドライン: [`bot/kameo-guidelines.md`](bot/kameo-guidelines.md)
+- 出題時の会話テンプレート: [`bot/kameo-templates.md`](bot/kameo-templates.md)
+- 中本アイアールの口調ガイド: [`bot/nakamoto-style-guide.md`](bot/nakamoto-style-guide.md)
