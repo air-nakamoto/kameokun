@@ -42,8 +42,26 @@ function resolveTTL(): number {
 const SESSION_TTL_MS = resolveTTL();
 const CLEANUP_INTERVAL_MS = 60 * 1000; // 1分間隔でしか実走しないスロットル
 
-const sessions = new Map<string, Session>();
-let lastCleanupAt = 0;
+interface SessionStoreState {
+  sessions: Map<string, Session>;
+  lastCleanupAt: number;
+}
+
+type GlobalWithSessionStore = typeof globalThis & {
+  __kameoSessionStore?: SessionStoreState;
+};
+
+// Next.js dev/server環境では route bundle ごとにモジュールが再評価されることがある。
+// module-local Map だけにすると /api/generate-problem と /api/dialogue で
+// 別ストアになる可能性があるため、プロセス内では globalThis に寄せて共有する。
+const store =
+  (globalThis as GlobalWithSessionStore).__kameoSessionStore ??
+  ((globalThis as GlobalWithSessionStore).__kameoSessionStore = {
+    sessions: new Map<string, Session>(),
+    lastCleanupAt: 0,
+  });
+
+const sessions = store.sessions;
 
 function isExpired(s: Session, now = Date.now()): boolean {
   return now - new Date(s.updated_at).getTime() > SESSION_TTL_MS;
@@ -51,8 +69,8 @@ function isExpired(s: Session, now = Date.now()): boolean {
 
 function cleanupExpiredSessions(): void {
   const now = Date.now();
-  if (now - lastCleanupAt < CLEANUP_INTERVAL_MS) return;
-  lastCleanupAt = now;
+  if (now - store.lastCleanupAt < CLEANUP_INTERVAL_MS) return;
+  store.lastCleanupAt = now;
   for (const [id, s] of sessions) {
     if (isExpired(s, now)) {
       sessions.delete(id);
@@ -124,7 +142,7 @@ export function getSessionTTL(): number {
 // テスト専用: 強制的にすべてのセッションを破棄する
 export function _resetSessionsForTest(): void {
   sessions.clear();
-  lastCleanupAt = 0;
+  store.lastCleanupAt = 0;
 }
 
 // テスト専用: 期限切れ判定を強制実行する（throttleを無視）
@@ -137,6 +155,6 @@ export function _forceCleanupForTest(): number {
       removed++;
     }
   }
-  lastCleanupAt = now;
+  store.lastCleanupAt = now;
   return removed;
 }
