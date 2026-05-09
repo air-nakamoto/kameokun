@@ -1,3 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Resolve the known README.md conflict for the Claude Project migration PR.
+#
+# Usage:
+#   scripts/resolve-readme-conflict.sh
+#   scripts/resolve-readme-conflict.sh --commit
+#
+# The script writes the canonical merged README that keeps the GitHub migration
+# section and adds the imported bot resources as a separate section.
+
+commit_after=false
+if [[ "${1:-}" == "--commit" ]]; then
+  commit_after=true
+elif [[ $# -gt 0 ]]; then
+  echo "Usage: $0 [--commit]" >&2
+  exit 2
+fi
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+cat > README.md <<'README_EOF'
 # kameokunwork
 
 亀尾くん問題を GitHub 上で継続して作成・管理するためのリポジトリです。
@@ -66,3 +90,17 @@ Claude Project から取り込んだボット向け資料は `bot/` ディレク
 - 統合ガイドライン: [`bot/kameo-guidelines.md`](bot/kameo-guidelines.md)
 - 出題時の会話テンプレート: [`bot/kameo-templates.md`](bot/kameo-templates.md)
 - 中本アイアールの口調ガイド: [`bot/nakamoto-style-guide.md`](bot/nakamoto-style-guide.md)
+README_EOF
+
+if rg -n '^(<<<<<<<|=======|>>>>>>>)' README.md >/dev/null; then
+  echo "README.md still contains conflict markers" >&2
+  exit 1
+fi
+
+git add README.md
+
+echo "README.md conflict resolved and staged."
+
+if [[ "$commit_after" == true ]]; then
+  git commit -m "Resolve README conflict for bot docs"
+fi
