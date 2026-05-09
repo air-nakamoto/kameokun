@@ -1,0 +1,57 @@
+{
+  "id": "problem_broken01",
+  "schema_version": "1.0.0",
+  "public": {
+    "title": "壊れたフィクスチャ",
+    "intro": "validate-problem.mjs の9検査項目すべてに意図的に違反させたフィクスチャです。回帰テスト用。",
+    "rules": "テスト用",
+    "player_visible_tags": { "estimated_minutes": 15, "difficulty": "standard" }
+  },
+  "internal": {
+    "situation_type": "workplace",
+    "tone": "normal",
+    "charm_pattern": "x",
+    "misdirection": "x",
+    "truth_reveal": "x",
+    "solution_shape": "x"
+  },
+  "characters": [
+    { "id": "c1", "name": "A", "role": "r", "personality": "p", "known_facts": [], "unknown_facts": [], "is_client": false },
+    { "id": "c1", "name": "B", "role": "r", "personality": "p", "known_facts": [], "unknown_facts": [] }
+  ],
+  "truth": {
+    "hidden_truth": "x",
+    "objective_facts": [
+      { "id": "f1", "fact": "x", "verifiable_by": ["c1"] },
+      { "id": "f1", "fact": "y", "verifiable_by": ["c_missing"] }
+    ],
+    "subjective_beliefs": [
+      { "character_id": "c_missing", "belief": "x" }
+    ],
+    "misunderstandings": [],
+    "two_stage_structure": { "stage_1_truth": "x", "stage_2_solution": "y" }
+  },
+  "answer_policy": {
+    "default_style": "character_roleplay",
+    "allowed_answer_types": ["yes"],
+    "reveal_rules": [],
+    "refusal_rules": []
+  },
+  "solution_criteria": {
+    "truth_requirements": [
+      { "id": "shared", "description": "x", "anchored_facts": ["f_missing"] }
+    ],
+    "solution_requirements": [
+      { "id": "shared", "description": "y" }
+    ],
+    "minimum_to_clear": ["nonexistent"]
+  },
+  "quality_gate": {
+    "passed": false,
+    "fail_conditions": [
+      { "code": "solvable_without_truth", "triggered": false },
+      { "code": "solvable_without_truth", "triggered": false },
+      { "code": "bogus_code", "triggered": false }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": "problem_fixture01",
+  "schema_version": "1.0.0",
+  "public": {
+    "title": "整合フィクスチャ",
+    "intro": "validate-problem.mjs の9検査項目すべてをpassする最小構成のフィクスチャです。実際のゲーム性は持たず、構造的整合性のみ検査対象とします。",
+    "rules": "テスト用",
+    "player_visible_tags": { "estimated_minutes": 10, "difficulty": "beginner" }
+  },
+  "internal": {
+    "situation_type": "workplace",
+    "tone": "light",
+    "charm_pattern": "test",
+    "misdirection": "test",
+    "truth_reveal": "test",
+    "solution_shape": "test"
+  },
+  "characters": [
+    {
+      "id": "client1",
+      "name": "相談者",
+      "role": "依頼人",
+      "personality": "丁寧",
+      "known_facts": [],
+      "unknown_facts": [],
+      "is_client": true
+    },
+    {
+      "id": "person2",
+      "name": "登場人物B",
+      "role": "関係者",
+      "personality": "穏やか",
+      "known_facts": [],
+      "unknown_facts": []
+    }
+  ],
+  "truth": {
+    "hidden_truth": "テスト用真相",
+    "objective_facts": [
+      { "id": "fact1", "fact": "テスト事実1", "verifiable_by": ["person2"] },
+      { "id": "fact2", "fact": "テスト事実2", "verifiable_by": ["client1"] },
+      { "id": "fact3", "fact": "テスト事実3", "verifiable_by": ["person2"] }
+    ],
+    "subjective_beliefs": [
+      { "character_id": "client1", "belief": "テスト思い込み", "is_misperception": true }
+    ],
+    "misunderstandings": ["テスト誤解"],
+    "two_stage_structure": {
+      "stage_1_truth": "テスト真相",
+      "stage_2_solution": "テスト解決策"
+    }
+  },
+  "answer_policy": {
+    "default_style": "character_roleplay",
+    "allowed_answer_types": ["yes", "no", "unknown", "partial", "freeform"],
+    "reveal_rules": [],
+    "refusal_rules": []
+  },
+  "solution_criteria": {
+    "truth_requirements": [
+      { "id": "tr1", "description": "テスト要件1", "anchored_facts": ["fact1"] }
+    ],
+    "solution_requirements": [
+      { "id": "sr1", "description": "テスト解決要件1" }
+    ],
+    "minimum_to_clear": ["tr1", "sr1"]
+  },
+  "quality_gate": {
+    "passed": false,
+    "fail_conditions": [
+      { "code": "solvable_without_truth", "triggered": false },
+      { "code": "solution_not_unique", "triggered": false },
+      { "code": "unnatural_concealment", "triggered": false },
+      { "code": "unreachable_truth", "triggered": false },
+      { "code": "charm_relies_on_oddity_only", "triggered": false },
+      { "code": "stage1_stage2_too_close", "triggered": false },
+      { "code": "truth_lacks_objective_anchor", "triggered": false },
+      { "code": "solution_too_abstract", "triggered": false },
+      { "code": "pattern_collision_with_samples", "triggered": false }
+    ]
+  }
+}

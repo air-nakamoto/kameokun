@@ -1,0 +1,429 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kameokun.local/schemas/problem.schema.json",
+  "title": "KameokunProblem",
+  "type": "object",
+  "required": [
+    "id",
+    "schema_version",
+    "public",
+    "internal",
+    "characters",
+    "truth",
+    "answer_policy",
+    "solution_criteria",
+    "quality_gate"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^problem_[a-z0-9]{8,}$"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generation_meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "generation_model": { "type": "string" },
+        "seed_patterns_used": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "regenerate_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+
+    "public": {
+      "type": "object",
+      "description": "プレイヤーに直接返してよい範囲のみ",
+      "required": ["title", "intro", "rules", "player_visible_tags"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "intro": { "type": "string", "minLength": 50, "maxLength": 600 },
+        "rules": { "type": "string" },
+        "player_visible_tags": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["estimated_minutes", "difficulty"],
+          "properties": {
+            "estimated_minutes": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 60
+            },
+            "difficulty": {
+              "enum": ["beginner", "standard", "advanced"]
+            }
+          }
+        }
+      }
+    },
+
+    "internal": {
+      "type": "object",
+      "description": "プレイヤー非公開。生成パラメータと作問パターン",
+      "required": [
+        "situation_type",
+        "tone",
+        "charm_pattern",
+        "misdirection",
+        "truth_reveal",
+        "solution_shape"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "situation_type": {
+          "enum": [
+            "workplace",
+            "family",
+            "school",
+            "daily",
+            "service",
+            "community",
+            "other"
+          ]
+        },
+        "tone": {
+          "enum": ["light", "normal", "heavy"],
+          "description": "後味の重さ。メタヒントになるためプレイヤーには非公開"
+        },
+        "charm_pattern": { "type": "string" },
+        "misdirection": { "type": "string" },
+        "truth_reveal": { "type": "string" },
+        "solution_shape": { "type": "string" },
+        "resolution_pattern": {
+          "enum": [
+            "perspective_shift",
+            "mutual_understanding",
+            "self_realization",
+            "fact_revelation"
+          ]
+        }
+      }
+    },
+
+    "characters": {
+      "type": "array",
+      "minItems": 1,
+      "description": "id の一意性、is_client: true が最低1名いること、はカスタム検証で担保する",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "role",
+          "personality",
+          "known_facts",
+          "unknown_facts"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "role": { "type": "string" },
+          "personality": { "type": "string" },
+          "speech_style": { "type": "string" },
+          "known_facts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "unknown_facts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "must_not_reveal_directly": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "is_client": {
+            "type": "boolean",
+            "default": false,
+            "description": "困りごとを相談している当事者かどうか"
+          }
+        }
+      }
+    },
+
+    "truth": {
+      "type": "object",
+      "description": "サーバ保管。プレイヤーには絶対に返さない",
+      "required": [
+        "hidden_truth",
+        "objective_facts",
+        "subjective_beliefs",
+        "misunderstandings",
+        "two_stage_structure"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "hidden_truth": {
+          "type": "string",
+          "description": "GM/判定用の真相サマリー"
+        },
+        "objective_facts": {
+          "type": "array",
+          "minItems": 3,
+          "description": "質問で確認可能な客観事実。最低3本の経路を確保する。id の一意性はカスタム検証で担保する",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "fact", "verifiable_by"],
+            "properties": {
+              "id": { "type": "string" },
+              "fact": { "type": "string" },
+              "verifiable_by": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "確認可能なキャラクターIDの配列"
+              }
+            }
+          }
+        },
+        "subjective_beliefs": {
+          "type": "array",
+          "description": "登場人物の思い込み・感情",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["character_id", "belief"],
+            "properties": {
+              "character_id": { "type": "string" },
+              "belief": { "type": "string" },
+              "is_misperception": { "type": "boolean" }
+            }
+          }
+        },
+        "misunderstandings": {
+          "type": "array",
+          "description": "プレイヤーに崩してほしい前提",
+          "items": { "type": "string" }
+        },
+        "two_stage_structure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stage_1_truth", "stage_2_solution"],
+          "properties": {
+            "stage_1_truth": { "type": "string" },
+            "stage_2_solution": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "answer_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_style",
+        "allowed_answer_types",
+        "reveal_rules",
+        "refusal_rules"
+      ],
+      "properties": {
+        "default_style": {
+          "enum": ["character_roleplay"]
+        },
+        "allowed_answer_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["yes", "no", "unknown", "partial", "freeform"]
+          }
+        },
+        "reveal_rules": {
+          "type": "array",
+          "description": "条件付き開示ルール",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["trigger", "content"],
+            "properties": {
+              "trigger": {
+                "type": "string",
+                "description": "開示条件（例: 質問者が家族について聞いた場合）"
+              },
+              "content": {
+                "type": "string",
+                "description": "開示してよい内容"
+              },
+              "stage_required": {
+                "enum": ["any", "stage_1", "stage_2"],
+                "default": "any"
+              }
+            }
+          }
+        },
+        "refusal_rules": {
+          "type": "array",
+          "description": "拒否すべき質問パターンとその対応",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pattern", "response_style"],
+            "properties": {
+              "pattern": { "type": "string" },
+              "response_style": { "type": "string" }
+            }
+          }
+        },
+        "consistency_rules": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "hints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nakamoto": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["level", "hint"],
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "hint": {
+                "type": "string",
+                "description": "解答そのものは含めない"
+              },
+              "topic": { "type": "string" }
+            }
+          }
+        },
+        "progress_thresholds": {
+          "type": "array",
+          "description": "到達度別の登場人物リアクション調整",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["min_progress", "reaction_style"],
+            "properties": {
+              "min_progress": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "reaction_style": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "solution_criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "truth_requirements",
+        "solution_requirements",
+        "minimum_to_clear"
+      ],
+      "properties": {
+        "truth_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "description": "stage_1 クリアに必要な発見項目。id は solution_requirements[].id と合わせて全体で一意。anchored_facts の実在はカスタム検証で担保する",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "description"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "anchored_facts": {
+                "type": "array",
+                "description": "対応する truth.objective_facts[].id",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "solution_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "description": "stage_2 クリアに必要な解決策要素。id は truth_requirements[].id と合わせて全体で一意（minimum_to_clear が共通参照のため）",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "description"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "minimum_to_clear": {
+          "type": "array",
+          "minItems": 1,
+          "description": "最低限満たすべき要件のID参照（truth_requirements / solution_requirements の id）。実在性はカスタム検証で担保する",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "quality_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fail_conditions", "passed"],
+      "properties": {
+        "passed": {
+          "type": "boolean",
+          "description": "生成直後は false。judgeModel 通過後に true へ更新"
+        },
+        "fail_conditions": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "description": "致命的欠陥チェック。9コードを各1回ずつ列挙し、1つでも triggered なら passed=false。生成LLMは自己点検結果を triggered=false で出力（自己点検で1つでも true なら出力前に修正）。判定LLM（judgeModel）は独立に再評価して上書きする。9コード全件かつ重複なしはカスタム検証で担保する",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "triggered"],
+            "properties": {
+              "code": {
+                "enum": [
+                  "solvable_without_truth",
+                  "solution_not_unique",
+                  "unnatural_concealment",
+                  "unreachable_truth",
+                  "charm_relies_on_oddity_only",
+                  "stage1_stage2_too_close",
+                  "truth_lacks_objective_anchor",
+                  "solution_too_abstract",
+                  "pattern_collision_with_samples"
+                ]
+              },
+              "triggered": { "type": "boolean" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "judge_model": { "type": "string" },
+        "judge_run_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
