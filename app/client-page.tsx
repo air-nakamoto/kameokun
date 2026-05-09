@@ -36,6 +36,13 @@ interface SolveResult {
   player_message: string;
 }
 
+interface NakamotoHint {
+  narration: string;
+  important_points: string[];
+  underexplored_points: string[];
+  suggested_next_questions: string[];
+}
+
 // ============== UI ==============
 
 const styles: Record<string, CSSProperties> = {
@@ -130,6 +137,29 @@ const styles: Record<string, CSSProperties> = {
     borderRadius: 6,
     marginTop: '0.75rem',
   },
+  hintBox: {
+    background: '#fff8e6',
+    border: '1px solid #e8c87a',
+    padding: '0.8rem 1rem',
+    borderRadius: 8,
+    marginTop: '0.75rem',
+  },
+  hintNarration: {
+    margin: '0 0 0.6rem',
+    whiteSpace: 'pre-wrap',
+    fontSize: '0.95rem',
+  },
+  hintHeading: {
+    margin: '0.4rem 0 0.2rem',
+    fontSize: '0.85rem',
+    color: '#7a5c1a',
+    fontWeight: 600,
+  },
+  hintList: {
+    margin: '0 0 0.4rem',
+    paddingLeft: '1.2rem',
+    fontSize: '0.9rem',
+  },
   divider: {
     border: 0,
     borderTop: '1px solid #eee',
@@ -177,6 +207,7 @@ export default function ClientPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [solveResult, setSolveResult] = useState<SolveResult | null>(null);
+  const [hint, setHint] = useState<NakamotoHint | null>(null);
 
   const historyRef = useRef<HTMLDivElement | null>(null);
 
@@ -217,6 +248,7 @@ export default function ClientPage() {
       setSelectedSpeakerId(defaultSpeaker);
       setHistory([]);
       setSolveResult(null);
+      setHint(null);
       setInput('');
       setAnswer('');
     } catch {
@@ -248,6 +280,7 @@ export default function ClientPage() {
           setSession(null);
           setHistory([]);
           setSolveResult(null);
+          setHint(null);
         }
         setError(friendlyError(res.status));
         return;
@@ -261,6 +294,44 @@ export default function ClientPage() {
           content: data.response ?? '',
         },
       ]);
+    } catch {
+      setError('通信エラーが発生しました。');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function callNakamoto() {
+    if (!session || busy) return;
+    if (history.length === 0) {
+      setError('まだ会話が始まっていません。質問してから呼んでください。');
+      return;
+    }
+    clearError();
+    setBusy(true);
+    try {
+      const res = await fetch('/api/nakamoto-hint', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ session_id: session.id }),
+      });
+      if (!res.ok) {
+        if (res.status === 404) {
+          setSession(null);
+          setHistory([]);
+          setSolveResult(null);
+          setHint(null);
+        }
+        setError(friendlyError(res.status));
+        return;
+      }
+      const data = await res.json();
+      setHint({
+        narration: data.narration ?? '',
+        important_points: data.important_points ?? [],
+        underexplored_points: data.underexplored_points ?? [],
+        suggested_next_questions: data.suggested_next_questions ?? [],
+      });
     } catch {
       setError('通信エラーが発生しました。');
     } finally {
@@ -286,6 +357,7 @@ export default function ClientPage() {
           setSession(null);
           setHistory([]);
           setSolveResult(null);
+          setHint(null);
         }
         setError(friendlyError(res.status));
         return;
@@ -424,7 +496,28 @@ export default function ClientPage() {
               disabled={busy}
               style={styles.textarea}
             />
-            <div style={{ marginTop: '0.4rem', textAlign: 'right' }}>
+            <div
+              style={{
+                marginTop: '0.4rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '0.5rem',
+                flexWrap: 'wrap',
+              }}
+            >
+              <button
+                type="button"
+                onClick={callNakamoto}
+                disabled={busy || history.length === 0}
+                style={{
+                  ...styles.buttonSecondary,
+                  ...(busy || history.length === 0 ? styles.buttonDisabled : {}),
+                }}
+                title="行き詰まったら呼んでみてください"
+              >
+                🐢 中本さんを呼ぶ
+              </button>
               <button
                 type="button"
                 onClick={sendMessage}
@@ -437,6 +530,74 @@ export default function ClientPage() {
                 {busy ? '送信中...' : '送信'}
               </button>
             </div>
+
+            {hint && (
+              <div style={styles.hintBox}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '0.3rem',
+                  }}
+                >
+                  <strong style={{ fontSize: '0.95rem' }}>
+                    🐢 中本アイアールからの作戦会議
+                  </strong>
+                  <button
+                    type="button"
+                    onClick={() => setHint(null)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      color: '#7a5c1a',
+                    }}
+                    aria-label="閉じる"
+                  >
+                    閉じる
+                  </button>
+                </div>
+                <p style={styles.hintNarration}>{hint.narration}</p>
+                {hint.important_points.length > 0 && (
+                  <>
+                    <div style={styles.hintHeading}>
+                      ここまでに分かっていること
+                    </div>
+                    <ul style={styles.hintList}>
+                      {hint.important_points.map((p, i) => (
+                        <li key={`imp-${i}`}>{p}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {hint.underexplored_points.length > 0 && (
+                  <>
+                    <div style={styles.hintHeading}>
+                      まだ深掘りできそうなところ
+                    </div>
+                    <ul style={styles.hintList}>
+                      {hint.underexplored_points.map((p, i) => (
+                        <li key={`und-${i}`}>{p}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {hint.suggested_next_questions.length > 0 && (
+                  <>
+                    <div style={styles.hintHeading}>
+                      次に聞いてみるとよさそうな質問
+                    </div>
+                    <ul style={styles.hintList}>
+                      {hint.suggested_next_questions.map((p, i) => (
+                        <li key={`sug-${i}`}>{p}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            )}
           </section>
 
           <hr style={styles.divider} />
