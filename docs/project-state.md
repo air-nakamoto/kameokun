@@ -4,17 +4,25 @@
 
 具体的な優先順位と実装候補は [実装計画と課題一覧](implementation-plan.md) を参照してください。
 
-## 現在の状態
+## 現在の状態（2026-05-10 時点）
 
 - Next.js App Router のMVPが実装済み
 - ブラウザ上で以下の流れを操作可能
   - 問題生成
   - 登場人物との対話
   - 解答判定
-  - 中本さんヒント
+  - 中本さんヒント（「🐢 ヒント」ボタン）
+  - **感想戦（解決後の解説。stage_2_cleared 限定）** ← 2026-05-10 追加
 - `KAMEO_USE_STUBS=true` ではデモ問題「伝わらない報告」と簡易スタブ応答で動作
 - `ANTHROPIC_API_KEY` を入れると実LLM経路に切り替わる
 - 問題JSON、真相、解決条件はサーバ側セッションに保持し、クライアントには返さない
+- **本番デプロイ済み**: https://kameokun.onrender.com（Render free プラン、`autoDeploy: true`、main への push で自動反映）
+
+## 次フェーズ企画
+
+> [implementation-plan.md](implementation-plan.md) の「次フェーズ企画 (αβγ)」が現在の主軸。
+> α: 実LLM稼働化＋観察（〜1日） → β: 問題ライブラリ（〜2日） → γ: 共有URL＋社会的指標（〜2日）。
+> 詳細・設計判断ポイント・ロードマップはそちらを参照。
 
 ## 起動方法
 
@@ -56,6 +64,7 @@ npm test
 | `KAMEO_MODEL_SOLVE_CHECK` | 解答判定モデル |
 | `KAMEO_MODEL_SAFETY` | 安全検査モデル |
 | `KAMEO_MODEL_NAKAMOTO_HINT` | 中本ヒントモデル |
+| `KAMEO_MODEL_EXPLANATION` | 感想戦モデル |
 | `KAMEO_SESSION_TTL_MS` | セッションTTL。未指定時は2時間 |
 
 ## 主要ファイル
@@ -77,6 +86,10 @@ npm test
 - `app/api/nakamoto-hint/route.ts`
   - 中本ヒント
   - `session_id` のみ受け取り、問題JSONは受け取らない
+- `app/api/explanation/route.ts`
+  - 解決後の感想戦
+  - `session.stage !== 'stage_2'` で 403 explanation_locked
+  - `truth.hidden_truth` 生テキストは返さず、物語化した summary と stage_breakdown を返す
 
 ### ライブラリ
 
@@ -112,6 +125,10 @@ npm test
 - `prompts/nakamoto-hint.md`
   - 中本アイアールとして進行ヒントを出す
   - history内の強い真相表現を再掲しないよう制約済み
+- `prompts/explanation.md`
+  - 解決後の感想戦
+  - 中本口調＋ネタばらし許可モード
+  - summary / stage_breakdown / learning_points / missed_facts を返す
 
 ### スキーマ・検証
 
