@@ -1,0 +1,33 @@
+# Render Blueprint
+# https://render.com/docs/blueprint-spec
+#
+# 使い方:
+#   1. Render ダッシュボードで "New" → "Blueprint" を選び、このリポジトリを指定
+#   2. 自動で以下の Web Service が立ち上がる
+#   3. 環境変数 ANTHROPIC_API_KEY を Render ダッシュボードで設定（任意）
+#      - 未設定 / KAMEO_USE_STUBS=true ならスタブモードで動作
+#
+# 注意:
+#   - free プランは 15 分のアイドルでスピンダウン → 次回アクセス時に 30〜60 秒の cold start
+#   - インメモリセッションはインスタンス再起動で消える（MVP想定）
+#   - 永続化が必要なら Vercel KV / Upstash Redis に lib/session-store.ts を差し替える
+
+services:
+  - type: web
+    name: kameokun
+    runtime: node
+    plan: free
+    region: singapore # 日本に近い。oregon / frankfurt / virginia なども可
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    autoDeploy: true # main へのpushで自動デプロイ
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # API キー未投入時のフォールバック。
+      # ANTHROPIC_API_KEY を設定したら "false" に変えるか削除する。
+      - key: KAMEO_USE_STUBS
+        value: "true"
+      # ANTHROPIC_API_KEY は Blueprint には書かず、
+      # Render ダッシュボードの Environment タブから secret として設定する。

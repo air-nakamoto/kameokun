@@ -4,6 +4,9 @@
   "private": true,
   "description": "亀夫君問題WEBサービスのMVP土台（スキーマ・プロンプト・検証スクリプト・APIスケルトン）",
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
