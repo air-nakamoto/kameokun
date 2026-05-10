@@ -1,7 +1,11 @@
-import type { DialogueOutput, SolveCheckOutput } from './llm-schemas';
+import type {
+  DialogueOutput,
+  ExplanationOutput,
+  SolveCheckOutput,
+} from './llm-schemas';
 import type { DialogueInputView } from './restricted-views';
 import type { Session } from './session-store';
-import type { Stage } from './types';
+import type { KameokunProblem, Stage } from './types';
 
 function includesAny(text: string, words: string[]): boolean {
   return words.some(w => text.includes(w));
@@ -278,5 +282,44 @@ export function buildDemoSolveCheck(
     can_reveal_explanation: false,
     player_message:
       'いくつか良い視点はありますが、まだ解決には届いていません。もう少し会話で情報を集めてみてください。',
+  };
+}
+
+export function buildDemoExplanation(
+  problem: KameokunProblem,
+  disclosedFactIds: string[],
+): ExplanationOutput {
+  const disclosedSet = new Set(disclosedFactIds);
+  const factById = new Map(
+    problem.truth.objective_facts.map(f => [f.id, f.fact] as const),
+  );
+  // 重要事実候補: stage_1_truth/stage_2_solution に紐づくID（demo-problem.json では
+  // truth_requirements.anchored_facts に列挙されている）
+  const anchorIds = new Set<string>();
+  for (const req of problem.solution_criteria.truth_requirements) {
+    for (const fid of req.anchored_facts ?? []) anchorIds.add(fid);
+  }
+  const missed: string[] = [];
+  for (const fid of anchorIds) {
+    if (!disclosedSet.has(fid)) {
+      const fact = factById.get(fid);
+      if (fact) missed.push(`${fact}、というポイントは触れずじまいやったかも`);
+    }
+    if (missed.length >= 3) break;
+  }
+
+  return {
+    summary:
+      '🐢「いやぁ、みごと解決ですね！報告がうまく伝わらなかった話と、先輩の付箋に込められた歩み寄り、その両方をちゃんと結びつけられたのは大きいですよ。健太くんも、明日からはもう少し肩の力を抜いて先輩と話せそうな気がしますね〜」',
+    stage_breakdown: {
+      stage_1_truth: problem.truth.two_stage_structure.stage_1_truth,
+      stage_2_solution: problem.truth.two_stage_structure.stage_2_solution,
+    },
+    learning_points: [
+      '報告は「経緯から書く」より「相手にしてほしい行動から書く」方が伝わりやすいケースが多いです',
+      '一見そっけない相手にも、不器用なりの歩み寄りが隠れていることがあります',
+      '思い込みを一旦疑って、別の角度から状況を見直す視点が水平思考のコアです',
+    ],
+    missed_facts: missed,
   };
 }

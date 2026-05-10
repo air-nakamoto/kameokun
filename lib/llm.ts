@@ -17,7 +17,8 @@ export type ModelRole =
   | 'judge'
   | 'solve-check'
   | 'safety'
-  | 'nakamoto-hint';
+  | 'nakamoto-hint'
+  | 'explanation';
 
 // 公式Docs (https://platform.claude.com/docs/en/about-claude/models/overview)
 // 記載のスナップショットIDをデフォルトに採用。
@@ -30,6 +31,7 @@ const DEFAULT_MODELS: Record<ModelRole, string> = {
   'solve-check': 'claude-sonnet-4-5-20250929',
   safety: 'claude-haiku-4-5-20251001',
   'nakamoto-hint': 'claude-sonnet-4-5-20250929',
+  explanation: 'claude-sonnet-4-5-20250929',
 };
 
 const ENV_KEYS: Record<ModelRole, string> = {
@@ -39,6 +41,7 @@ const ENV_KEYS: Record<ModelRole, string> = {
   'solve-check': 'KAMEO_MODEL_SOLVE_CHECK',
   safety: 'KAMEO_MODEL_SAFETY',
   'nakamoto-hint': 'KAMEO_MODEL_NAKAMOTO_HINT',
+  explanation: 'KAMEO_MODEL_EXPLANATION',
 };
 
 function getModelName(role: ModelRole): string {

@@ -7,7 +7,8 @@ export type PromptName =
   | 'safety-check'
   | 'dialogue-character'
   | 'solve-check'
-  | 'nakamoto-hint';
+  | 'nakamoto-hint'
+  | 'explanation';
 
 const ALLOWED: ReadonlySet<PromptName> = new Set([
   'generate-problem',
@@ -16,6 +17,7 @@ const ALLOWED: ReadonlySet<PromptName> = new Set([
   'dialogue-character',
   'solve-check',
   'nakamoto-hint',
+  'explanation',
 ]);
 
 const PROMPT_DIR = join(process.cwd(), 'prompts');

@@ -43,6 +43,16 @@ interface NakamotoHint {
   suggested_next_questions: string[];
 }
 
+interface Explanation {
+  summary: string;
+  stage_breakdown: {
+    stage_1_truth: string;
+    stage_2_solution: string;
+  };
+  learning_points: string[];
+  missed_facts: string[];
+}
+
 // ============== UI ==============
 
 const styles: Record<string, CSSProperties> = {
@@ -160,6 +170,28 @@ const styles: Record<string, CSSProperties> = {
     paddingLeft: '1.2rem',
     fontSize: '0.9rem',
   },
+  explanationBox: {
+    background: '#eef4ff',
+    border: '1px solid #a8c4f0',
+    padding: '0.9rem 1rem',
+    borderRadius: 8,
+    marginTop: '0.8rem',
+  },
+  explanationHeading: {
+    margin: '0.5rem 0 0.2rem',
+    fontSize: '0.85rem',
+    color: '#1f3a72',
+    fontWeight: 600,
+  },
+  explanationStage: {
+    background: '#fff',
+    border: '1px solid #cdd9f0',
+    padding: '0.5rem 0.7rem',
+    borderRadius: 6,
+    marginBottom: '0.4rem',
+    fontSize: '0.92rem',
+    whiteSpace: 'pre-wrap',
+  },
   divider: {
     border: 0,
     borderTop: '1px solid #eee',
@@ -209,6 +241,7 @@ export default function ClientPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [solveResult, setSolveResult] = useState<SolveResult | null>(null);
   const [hint, setHint] = useState<NakamotoHint | null>(null);
+  const [explanation, setExplanation] = useState<Explanation | null>(null);
 
   const historyRef = useRef<HTMLDivElement | null>(null);
 
@@ -257,6 +290,7 @@ export default function ClientPage() {
       setHistory([]);
       setSolveResult(null);
       setHint(null);
+      setExplanation(null);
       setInput('');
       setAnswer('');
       setStatusMessage('問題を開始しました。');
@@ -291,6 +325,7 @@ export default function ClientPage() {
           setHistory([]);
           setSolveResult(null);
           setHint(null);
+          setExplanation(null);
         }
         setError(friendlyError(res.status));
         return;
@@ -331,6 +366,7 @@ export default function ClientPage() {
           setHistory([]);
           setSolveResult(null);
           setHint(null);
+          setExplanation(null);
         }
         setError(friendlyError(res.status));
         return;
@@ -368,12 +404,56 @@ export default function ClientPage() {
           setHistory([]);
           setSolveResult(null);
           setHint(null);
+          setExplanation(null);
         }
         setError(friendlyError(res.status));
         return;
       }
       const data: SolveResult = await res.json();
       setSolveResult(data);
+      // 新たに stage_2_cleared でなくなった場合、古い explanation を残すと不整合
+      if (data.status !== 'stage_2_cleared') {
+        setExplanation(null);
+      }
+    } catch {
+      setError('通信エラーが発生しました。');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function fetchExplanation() {
+    if (!session || busy) return;
+    if (!solveResult || solveResult.status !== 'stage_2_cleared') return;
+    clearError();
+    setBusy(true);
+    try {
+      const res = await fetch('/api/explanation', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ session_id: session.id }),
+      });
+      if (!res.ok) {
+        if (res.status === 404) {
+          setSession(null);
+          setHistory([]);
+          setSolveResult(null);
+          setHint(null);
+          setExplanation(null);
+        }
+        setError(friendlyError(res.status));
+        return;
+      }
+      const data = await res.json();
+      setExplanation({
+        summary: data.summary ?? '',
+        stage_breakdown: {
+          stage_1_truth: data.stage_breakdown?.stage_1_truth ?? '',
+          stage_2_solution: data.stage_breakdown?.stage_2_solution ?? '',
+        },
+        learning_points: data.learning_points ?? [],
+        missed_facts: data.missed_facts ?? [],
+      });
     } catch {
       setError('通信エラーが発生しました。');
     } finally {
@@ -664,6 +744,99 @@ export default function ClientPage() {
                 <p style={{ margin: '0.4rem 0 0', whiteSpace: 'pre-wrap' }}>
                   {solveResult.player_message}
                 </p>
+                {solveResult.status === 'stage_2_cleared' &&
+                  solveResult.can_reveal_explanation &&
+                  !explanation && (
+                    <div style={{ marginTop: '0.6rem' }}>
+                      <button
+                        type="button"
+                        onClick={fetchExplanation}
+                        disabled={busy}
+                        style={{
+                          ...styles.button,
+                          ...(busy ? styles.buttonDisabled : {}),
+                        }}
+                      >
+                        {busy ? '解説を準備中...' : '🐢 解説を見る（感想戦）'}
+                      </button>
+                    </div>
+                  )}
+              </div>
+            )}
+
+            {explanation && (
+              <div style={styles.explanationBox}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '0.4rem',
+                  }}
+                >
+                  <strong style={{ fontSize: '0.95rem' }}>
+                    🐢 中本アイアールの感想戦
+                  </strong>
+                  <button
+                    type="button"
+                    onClick={() => setExplanation(null)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      color: '#1f3a72',
+                    }}
+                    aria-label="閉じる"
+                  >
+                    閉じる
+                  </button>
+                </div>
+                <p
+                  style={{
+                    margin: '0 0 0.6rem',
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  {explanation.summary}
+                </p>
+
+                <div style={styles.explanationHeading}>第1の謎の答え</div>
+                <div style={styles.explanationStage}>
+                  {explanation.stage_breakdown.stage_1_truth}
+                </div>
+
+                <div style={styles.explanationHeading}>第2の謎の解決策</div>
+                <div style={styles.explanationStage}>
+                  {explanation.stage_breakdown.stage_2_solution}
+                </div>
+
+                {explanation.learning_points.length > 0 && (
+                  <>
+                    <div style={styles.explanationHeading}>
+                      水平思考の学び
+                    </div>
+                    <ul style={styles.hintList}>
+                      {explanation.learning_points.map((p, i) => (
+                        <li key={`lp-${i}`}>{p}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {explanation.missed_facts.length > 0 && (
+                  <>
+                    <div style={styles.explanationHeading}>
+                      惜しかったところ
+                    </div>
+                    <ul style={styles.hintList}>
+                      {explanation.missed_facts.map((p, i) => (
+                        <li key={`mf-${i}`}>{p}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </div>
             )}
           </section>

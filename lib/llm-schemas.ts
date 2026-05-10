@@ -114,3 +114,14 @@ export const NakamotoHintOutputSchema = z.object({
   suggested_next_questions: z.array(z.string()).min(1).max(3),
 });
 export type NakamotoHintOutput = z.infer<typeof NakamotoHintOutputSchema>;
+
+export const ExplanationOutputSchema = z.object({
+  summary: z.string().min(1),
+  stage_breakdown: z.object({
+    stage_1_truth: z.string().min(1),
+    stage_2_solution: z.string().min(1),
+  }),
+  learning_points: z.array(z.string()).min(1).max(3),
+  missed_facts: z.array(z.string()).max(3),
+});
+export type ExplanationOutput = z.infer<typeof ExplanationOutputSchema>;
