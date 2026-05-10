@@ -538,9 +538,9 @@ export default function ClientPage() {
                   ...styles.buttonSecondary,
                   ...(busy || history.length === 0 ? styles.buttonDisabled : {}),
                 }}
-                title="行き詰まったら呼んでみてください"
+                title="中本アイアールがヒントをくれます"
               >
-                🐢 中本さんを呼ぶ
+                🐢 ヒント
               </button>
               <button
                 type="button"
