@@ -18,7 +18,9 @@ services:
     runtime: node
     plan: free
     region: singapore # 日本に近い。oregon / frankfurt / virginia なども可
-    buildCommand: npm ci && npm run build
+    # NODE_ENV=production だと npm ci が devDependencies をスキップする。
+    # next build には typescript / @types/* が必須なので --include=dev で明示的に入れる。
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start
     healthCheckPath: /
     autoDeploy: true # main へのpushで自動デプロイ
